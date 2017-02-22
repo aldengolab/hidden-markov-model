@@ -15,11 +15,26 @@ This implementation adopts his approach into a system that can take:
 - An initial emission matrix
 - A set of observations
 
-You can see an example input by using the `main()` function call on the `hmm.py` file.
+You can see an example input by using the `main()` function call on the `hmm.py` file. 
 
 HMM models calculate first the probability of a given sequence and its individual observations for possible hidden state sequences, then re-calculate the matrices above given those probabilities. By iterating back and forth (what's called an expectation-maximization process), the model arrives at a local optimum for the tranmission and emission probabilities. It's a pretty good outcome for what might otherwise be a very hefty computationally difficult problem. 
 
 This model implements the [forward-backward](https://en.wikipedia.org/wiki/Forward%E2%80%93backward_algorithm) algorithm recursively for probability calculation within the broader [expectation-maximization](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm) pattern.
+
+## Use of Current Release
+
+This system can currently: 
+
+- Train an HMM model on a set of observations, given a number of hidden states N
+- Determine the likelihood of a new set of observations given the training observations and the learned hidden state probabilities
+
+## To Come
+
+I'm a full time student and this is a side project. It's still in progress. Things to come:
+
+ - Further methodology
+ - Full Testing suite
+ - Viterbi decoding for understanding the most likely sequence of hidden states
 
 ## Sample Usage 
 
@@ -32,11 +47,3 @@ This model implements the [forward-backward](https://en.wikipedia.org/wiki/Forwa
 `model.train(observations)`  
 `new_seq = ['1', '2', '3']`  
 `likelihood = model.likelihood(new_seq)`
-
-## To Come
-
-I'm a full time student and this is a side project. It's still in progress. Things to come:
-
- - Further methodology
- - Full Testing suite
- - Viterbi decoding for understanding the most likely sequence of hidden states
