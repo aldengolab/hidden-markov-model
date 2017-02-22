@@ -32,8 +32,9 @@ This system can currently:
 
 I'm a full time student and this is a side project. It's still in progress. Things to come:
 
- - Further methodology
+ - Further methodology & how-to documentation
  - Full Testing suite
+ - Computational underflow mitigation
  - Viterbi decoding for understanding the most likely sequence of hidden states
 
 ## Sample Usage 
