@@ -34,10 +34,8 @@ class HMM():
         self.forward_final = [0 , 0]
         self.backward_final = [0 , 0]
         self.state_probs = []
-        if obs is None:
-            self.assume_obs()
-        for i in range(len(obs)):
-            self.emiss_ref[obs[i]] = i
+        if obs is None and self.observations is not None:
+            self.obs = self.assume_obs()
 
     def assume_obs(self):
         '''
@@ -45,23 +43,27 @@ class HMM():
         probabilities are in alpha-numerical order.
         '''
         obs = list(set(list(self.observations)))
-        self.obs = obs.sort()
+        obs.sort()
+        for i in range(len(obs)):
+            self.emiss_ref[obs[i]] = i
+        return obs
 
     def train(self, observations, iterations = 10, verbose=True):
         '''
         Trains the model parameters according to the observation sequence.
 
         Input:
-        - observations: 1-D numpy array of T observations
+        - observations: 1-D string array of T observations
         '''
         self.observations = observations
+        self.obs = self.assume_obs()
         self.psi = [[[0.0] * (len(self.observations)-1) for i in range(self.n)] for i in range(self.n)]
         self.gamma = [[0.0] * (len(self.observations)) for i in range(self.n)]
         for i in range(iterations):
             old_transmission = self.transmission_prob.copy()
             old_emission = self.emission_prob.copy()
             if verbose:
-                print("Iteration: {}".format(i))
+                print("Iteration: {}".format(i + 1))
             self.expectation()
             self.maximization()
 
@@ -239,13 +241,26 @@ class HMM():
         Returns the probability of a observation sequence based on current model
         parameters.
         '''
-        seq_p = 0
-        for i in range(len(new_observations)):
-            p = 0
-            for state in range(self.n):
-                observation = self.emiss_ref[new_observations[i]]
-                transmission = self.transmission_prob[state][i]
-                emission = self.emission_prob[observation][state]
-                p += transmission * emission
-            seq_p += p
-        return seq_p
+        new_hmm = HMM(self.transmission_prob, self.emission_prob)
+        new_hmm.observations = new_observations
+        new_hmm.obs = new_hmm.assume_obs()
+        forward = new_hmm.forward_recurse(len(new_observations))
+        return sum(new_hmm.forward_final)
+
+if __name__ == '__main__':
+    # Example inputs from Jason Eisner's Ice Cream and Baltimore Summer example
+    # http://www.cs.jhu.edu/~jason/papers/#eisner-2002-tnlp
+    emission = np.array([[0.7, 0], [0.2, 0.3], [0.1, 0.7]])
+    transmission = np.array([ [0, 0, 0, 0], [0.5, 0.8, 0.2, 0], [0.5, 0.1, 0.7, 0], [0, 0.1, 0.1, 0]])
+    observations = ['2','3','3','2','3','2','3','2','2','3','1','3','3','1','1',
+                    '1','2','1','1','1','3','1','2','1','1','1','2','3','3','2',
+                    '3','2','2']
+    model = HMM(transmission, emission)
+    model.train(observations)
+    print("Model transmission probabilities:\n{}".format(model.transmission_prob))
+    print("Model emission probabilities:\n{}".format(model.emission_prob))
+    # Probability of a new sequence
+    new_seq = ['1', '2', '3']
+    print("Finding likelihood for {}".format(new_seq))
+    likelihood = model.likelihood(new_seq)
+    print("Likelihood: {}".format(likelihood))
